@@ -41,7 +41,7 @@ try {
     // Content
     $mail->isHTML(false);                                       // Set email format to plain text
     $mail->Subject = $subject;
-    $mail->Body    = $body;
+    $mail->Body    = $body;git 
 
     // Send the email
     $mail->send();
