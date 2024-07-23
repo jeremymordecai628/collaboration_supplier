@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Form Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #search-input {
+            margin-bottom: 20px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Purchase Form Data</h1>
+    <input type="text" id="search-input" placeholder="Search by ID...">
+    <ul id="purchase-list"></ul>
+    <div id="result"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const purchaseList = document.getElementById('purchase-list');
+            const searchInput = document.getElementById('search-input');
+            const resultDiv = document.getElementById('result');
+
+            function displayPurchases() {
+                purchaseList.innerHTML = '';
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `ID: ${key}, Data: ${value}`;
+                    purchaseList.appendChild(listItem);
+                }
+            }
+
+            function searchPurchase() {
+                const searchKey = searchInput.value;
+                const value = localStorage.getItem(searchKey);
+                if (value) {
+                    resultDiv.textContent = `ID: ${searchKey}, Data: ${value}`;
+                } else {
+                    resultDiv.textContent = 'No data found for the given ID.';
+                }
+            }
+
+            searchInput.addEventListener('input', searchPurchase);
+            displayPurchases();
+        });
+    </script>
+</body>
+</html>
+
