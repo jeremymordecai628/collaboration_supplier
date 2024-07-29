@@ -2,11 +2,10 @@
 session_start(); // Start a session to handle user login state
 
 // Database connection details
-$servername = "your_db_host";
-$username = "your_db_user";
-$password = "your_db_password";
-$dbname = "your_db_name";
-
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "Supplier_Collaboration";
 // Create a connection function
 function get_db_connection() {
     global $servername, $username, $password, $dbname;
@@ -22,13 +21,12 @@ function get_db_connection() {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     // Get username and password from POST request
     $username = $_POST['username'];
-    $password = $_POST['password'];
 
     // Establish a database connection
     $conn = get_db_connection();
     // Prepare the SQL statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM users WHERE username=? AND password=?");
-    $stmt->bind_param("ss", $username, $password);
+    $stmt = $conn->prepare("SELECT * FROM users WHERE username=? ");
+    $stmt->bind_param("ss", $username, );
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
