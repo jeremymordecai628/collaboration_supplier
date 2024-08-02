@@ -58,7 +58,7 @@
             <button id="signup-btn" class="button">Sign Up</button>
         </div>
         <div class="form-container" id="signin-form">
-            <form action="/login" method="post">
+            <form action="../login.php" method="post">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
                 <br>
@@ -70,7 +70,10 @@
                 
                 <label for="organization">Organization:</label>
                 <select name="organization" id="organization" required>
-                    <!-- Options will be populated by JavaScript -->
+                    <option value="">Select Your organization</option>
+                    <option value="Company D">Company D</option>
+                    <option value="Company A">Company A</option>
+                    <option value="Company B">Company B</option>
                 </select>
                 <br>
                 <button type="submit" class="button">Sign In</button>
