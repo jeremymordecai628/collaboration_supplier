@@ -3,9 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Front Page</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+        }
+        .navbar {
+            width: 20%;
+            background-color: #333;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .navbar a {
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            text-align: center;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .navbar a:hover {
+            background-color: #575757;
+        }
+        .main-content {
+            width: 70%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
-    
+    <div class="navbar">
+        <h2>Navigation</h2>
+        <a href="code.html">Raise_Ticket</a>
+        <a href="Raised.html">Review_old Tickets</a>
+        <a href="#settings">Settings</a>
+        <a href="#logout">Logout</a>
+    </div>
+    <div class="main-content">
+        <h1>Welcome to the Front Page</h1>
+        <div id="user-info">Loading user data...</div>
+        <form id="user-form">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" readonly>
+            </div>
+            <div class="form-group">
+                <label for="position">Position:</label>
+                <input type="text" id="position" name="position" readonly>
+            </div>
+            <div class="form-group">
+                <label for="organization">Organization:</label>
+                <input type="text" id="organization" name="organization" readonly>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" readonly>
+            </div>
+            <!-- Add more fields as needed -->
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch user data from data.php
+            fetch('../data.php') // Adjust this path to the location of data.php
+                .then(response => response.json())
+                .then(data => {
+                    if (Object.keys(data).length > 0) {
+                        // Populate the form with user data
+                        document.getElementById('username').value = data.User_name || '';
+                        document.getElementById('position').value = data.User_position || '';
+                        document.getElementById('organization').value = data.User_organization || '';
+                        document.getElementById('email').value = data.User_email || '';
+                        // Add more fields as needed
+                    } else {
+                        document.getElementById('user-info').innerText = 'No user session found.';
+                    }
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+    </script>
 </body>
 </html>

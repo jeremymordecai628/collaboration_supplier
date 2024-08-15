@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve Purchase Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        form div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button[type="button"] {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="button"]:hover {
+            background-color: #45a049;
+        }
+
+        #formDataDisplay {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page title -->
+        <h1>Retrieve Purchase Request</h1>
+        
+        <!-- Form to input a key to retrieve data -->
+        <form id="retrieveForm">
+            <div>
+                <label for="retrieveKey">Enter Key:</label>
+                <input type="text" id="retrieveKey" name="retrieveKey" required>
+            </div>
+            <div>
+                <button type="button" onclick="retrieveFormData()">Retrieve Data</button>
+            </div>
+        </form>
+
+        <!-- Section to display the most recent form data -->
+        <h2>Most Recent Form Data</h2>
+        <div id="mostRecentData"></div>
+
+        <!-- Section to display the retrieved form data -->
+        <h2>Retrieved Form Data</h2>
+        <div id="formDataDisplay"></div>
+
+        <script>
+            /**
+             * Function to retrieve form data from local storage using a key
+             */
+            function retrieveFormData() {
+                // Get the key entered by the user
+                const key = document.getElementById('retrieveKey').value;
+
+                // Retrieve the form data from local storage using the key
+                const formData = localStorage.getItem(key);
+
+                // Check if form data exists for the given key
+                if (formData) {
+                    // Display the retrieved form data in a preformatted text block
+                    document.getElementById('formDataDisplay').innerHTML = `<pre>${formData}</pre>`;
+                } else {
+                    // Display a message if no data is found for the key
+                    document.getElementById('formDataDisplay').innerHTML = `<p>No data found for key: ${key}</p>`;
+                }
+            }
+
+            /**
+             * Function to find and display the most recent form data stored in local storage
+             */
+            function getMostRecentFormData() {
+                // Variables to store the most recent key and timestamp
+                let mostRecentKey = null;
+                let mostRecentTimestamp = 0;
+
+                // Loop through all keys in local storage
+                for (let i = 0; i < localStorage.length; i++) {
+                    // Get the current key
+                    const key = localStorage.key(i);
+
+                    // Parse the form data stored under the current key
+                    const formData = JSON.parse(localStorage.getItem(key));
+
+                    // Get the timestamp from the form data and convert it to a Date object
+                    const timestamp = new Date(formData.timestamp).getTime();
+
+                    // Check if the current timestamp is more recent than the stored most recent timestamp
+                    if (timestamp > mostRecentTimestamp) {
+                        // Update the most recent timestamp and key
+                        mostRecentTimestamp = timestamp;
+                        mostRecentKey = key;
+                    }
+                }
+
+                // Check if any form data was found in local storage
+                if (mostRecentKey) {
+                    // Retrieve and display the most recent form data
+                    const mostRecentFormData = localStorage.getItem(mostRecentKey);
+                    document.getElementById('mostRecentData').innerHTML = `<pre>${mostRecentFormData}</pre>`;
+                } else {
+                    // Display a message if no form data is found in local storage
+                    document.getElementById('mostRecentData').innerHTML = '<p>No form data found in local storage.</p>';
+                }
+            }
+
+            // Call the function to display the most recent form data on page load
+            getMostRecentFormData();
+        </script>
+    </div>
+</body>
+</html>

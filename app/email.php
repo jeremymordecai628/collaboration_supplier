@@ -2,13 +2,23 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+session_start(); // Start the session
+
+// Check if user session exists
+if (!isset($_SESSION['user'])) {
+    echo "User session does not exist!";
+    exit; // Exit if the session does not exist
+}
+
+// Retrieve user email and credentials from session
+$user_email = $_SESSION['user']['User_email'];
+$user_password = $_SESSION['user']['User_credetials']; // Assuming password is stored in the session
+
 require 'vendor/autoload.php'; // Load Composer's autoloader for PHPMailer
 
 // SMTP server configuration
-$smtp_server = "smtp.example.com";
-$smtp_port = 587;
-$smtp_user = "your_email@example.com";
-$smtp_password = "your_password";
+$smtp_server = "google.com"; // Your SMTP server
+$smtp_port = 587;                 // SMTP port
 
 // Email content
 $subject = "Test Email";
@@ -25,13 +35,13 @@ try {
     $mail->isSMTP();                                            // Send using SMTP
     $mail->Host       = $smtp_server;                           // Set the SMTP server to send through
     $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
-    $mail->Username   = $smtp_user;                             // SMTP username
-    $mail->Password   = $smtp_password;                         // SMTP password
+    $mail->Username   = $user_email;                            // SMTP username from session
+    $mail->Password   = $user_password;                         // SMTP password from session
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption, `ssl` also accepted
     $mail->Port       = $smtp_port;                             // TCP port to connect to
 
     // Sender
-    $mail->setFrom($smtp_user);
+    $mail->setFrom($user_email);                                // Set the sender's email
 
     // Recipients
     foreach ($recipients as $recipient) {
@@ -41,7 +51,7 @@ try {
     // Content
     $mail->isHTML(false);                                       // Set email format to plain text
     $mail->Subject = $subject;
-    $mail->Body    = $body;git 
+    $mail->Body    = $body;
 
     // Send the email
     $mail->send();
