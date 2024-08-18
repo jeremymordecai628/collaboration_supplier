@@ -4,6 +4,10 @@ use PHPMailer\PHPMailer\Exception;
 
 session_start(); // Start the session
 
+// Enable error reporting
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 // Check if user session exists
 if (!isset($_SESSION['user'])) {
     echo "User session does not exist!";
@@ -14,42 +18,43 @@ if (!isset($_SESSION['user'])) {
 $user_email = $_SESSION['user']['User_email'];
 $user_password = $_SESSION['user']['User_credetials']; // Assuming password is stored in the session
 
-require 'vendor/autoload.php'; // Load Composer's autoloader for PHPMailer
-
-// SMTP server configuration
-$smtp_server = "google.com"; // Your SMTP server
-$smtp_port = 587;                 // SMTP port
+// Placeholder for required variables
+$smtp_server = 'smtp.example.com'; // Replace with your SMTP server
+$smtp_port = 587; // Replace with your SMTP port
+$email = 'recipient@example.com'; // Replace with recipient email
 
 // Email content
-$subject = "Test Email";
-$body = "This is a test email sent to multiple recipients.";
+$subject = "Approval of Purchase Request";
+$body = "Dear Mr/Ms,\n\nWe were kindly requesting your approval of the request:\n\n";
 
-// List of recipients
-$recipients = ["recipient1@example.com", "recipient2@example.com", "recipient3@example.com"];
+// Add data to the email body
+$selectedData = []; // Replace with actual data
+foreach ($selectedData as $item) {
+    $body .= "Key: " . htmlspecialchars($item['key']) . "\n";
+    $body .= "Value: " . htmlspecialchars($item['value']) . "\n\n";
+}
 
 // Create the email
 $mail = new PHPMailer(true);
 
 try {
     // Server settings
-    $mail->isSMTP();                                            // Send using SMTP
-    $mail->Host       = $smtp_server;                           // Set the SMTP server to send through
-    $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
-    $mail->Username   = $user_email;                            // SMTP username from session
-    $mail->Password   = $user_password;                         // SMTP password from session
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption, `ssl` also accepted
-    $mail->Port       = $smtp_port;                             // TCP port to connect to
+    $mail->isSMTP();                                           // Send using SMTP
+    $mail->Host       = $smtp_server;                          // Set the SMTP server to send through
+    $mail->SMTPAuth   = true;                                  // Enable SMTP authentication
+    $mail->Username   = $user_email;                           // SMTP username from session
+    $mail->Password   = $user_password;                        // SMTP password from session        
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;        // Enable TLS encryption
+    $mail->Port       = $smtp_port;                            // TCP port to connect to
 
     // Sender
-    $mail->setFrom($user_email);                                // Set the sender's email
+    $mail->setFrom($user_email);                               // Set the sender's email
 
-    // Recipients
-    foreach ($recipients as $recipient) {
-        $mail->addAddress($recipient);                          // Add a recipient
-    }
+    // Recipient
+    $mail->addAddress($email);                                 // Add recipient email
 
     // Content
-    $mail->isHTML(false);                                       // Set email format to plain text
+    $mail->isHTML(false);                                      // Set email format to plain text
     $mail->Subject = $subject;
     $mail->Body    = $body;
 
