@@ -12,62 +12,168 @@
         h1 {
             color: #333;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
+        .container {
+            margin-bottom: 20px;
             padding: 10px;
-            text-align: left;
             border: 1px solid #ddd;
-        }
-        th {
+            border-radius: 5px;
+            cursor: pointer;
             background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+        }
+        .container:hover {
+            background-color: #e4e4e4;
+        }
+        .container.highlight {
+            border: 2px solid #ff0000;
+            background-color: #ffe6e6;
+        }
+        .container .key {
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        .container .value {
+            display: none;
+            margin-top: 10px;
+        }
+        .checkbox {
+            margin-right: 10px;
+        }
+        #emailInput {
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
 
+
     <h1>LocalStorage Data</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Key</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody id="localStorageData">
-            <!-- LocalStorage data will be inserted here -->
-        </tbody>
-    </table>
+
+    <div id="emailInput">
+        <input type="text" id="emailAddress" placeholder="Enter email address">
+        <button onclick="sendData()">Send Data</button>
+    </div>
+
+
+    <div id="localStorageData">
+        <!-- LocalStorage data will be inserted here -->
+    </div>
 
     <script>
-        // Get the table body element
-        const tableBody = document.getElementById('localStorageData');
+        // Get the div element to hold the data
+        const dataContainer = document.getElementById('localStorageData');
 
-        // Iterate through localStorage and display each key-value pair
+        // Define global variables to store technician and requester names
+        let technicianName = '';
+        let requesterName = '';
+
+        // Define the regular expression for the key format
+        const keyPattern = /^pr-\d+-\d+-\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+
+        // Iterate through localStorage and display each key-value pair that matches the pattern
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             const value = localStorage.getItem(key);
 
-            // Create a new row for the table
-            const row = document.createElement('tr');
+            // Check if the key matches the pattern
+            if (keyPattern.test(key)) {
+                // Retrieve requester and technician data
+                try {
+                    // Parse the JSON value
+                    const data = JSON.parse(value);
 
-            // Create a cell for the key
-            const keyCell = document.createElement('td');
-            keyCell.textContent = key;
+                    // Map technician and requester values
+                    if (data.technician) {
+                        technicianName = data.technician;
+                    }
+                    if (data.requester) {
+                        requesterName = data.requester;
+                    }
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    continue;
+                }
 
-            // Create a cell for the value
-            const valueCell = document.createElement('td');
-            valueCell.textContent = value;
+                // Create a new div for the container
+                const container = document.createElement('div');
+                container.classList.add('container');
+                container.setAttribute('data-key', key); // Add data attribute for key
 
-            // Append cells to the row
-            row.appendChild(keyCell);
-            row.appendChild(valueCell);
+                // Create a checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('checkbox');
+                checkbox.addEventListener('change', function() {
+                    // Highlight the container if the checkbox is checked
+                    if (this.checked) {
+                        container.classList.add('highlight');
+                    } else {
+                        container.classList.remove('highlight');
+                    }
+                });
 
-            // Append the row to the table body
-            tableBody.appendChild(row);
+                // Create a div for the key
+                const keyDiv = document.createElement('div');
+                keyDiv.classList.add('key');
+                keyDiv.textContent = `Requester ID: ${key}, Technician: ${technicianName}, Requester: ${requesterName}`;
+
+                // Create a div for the value
+                const valueDiv = document.createElement('div');
+                valueDiv.classList.add('value');
+                valueDiv.textContent = `Data: ${value}`;
+
+                // Append the checkbox, key, and value divs to the container
+                container.appendChild(checkbox);
+                container.appendChild(keyDiv);
+                container.appendChild(valueDiv);
+
+                // Append the container to the main data container
+                dataContainer.appendChild(container);
+
+                // Add a click event listener to toggle the visibility of the value div
+                container.addEventListener('click', (event) => {
+                    // Avoid toggling if the checkbox is clicked
+                    if (event.target !== checkbox) {
+                        valueDiv.style.display = valueDiv.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
+            }
+        }
+
+        // Function to send selected data via AJAX
+        function sendData() {
+            const email = document.getElementById('emailAddress').value.trim();
+            if (!email) {
+                alert('Please enter an email address.');
+                return;
+            }
+
+            // Collect data from checked containers
+            const selectedData = [];
+            document.querySelectorAll('.container.highlight').forEach(container => {
+                const key = container.querySelector('.key').textContent;
+                const value = container.querySelector('.value').textContent;
+                selectedData.push({ key, value });
+            });
+
+            if (selectedData.length === 0) {
+                alert('Please select at least one item to send.');
+                return;
+            }
+
+            // Send data to PHP script via AJAX
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '../email.php', true); // Adjust the path as needed
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert('Data sent successfully.');
+                } else {
+                    alert('Failed to send data.');
+                }
+            };
+            xhr.send(JSON.stringify({ email, data: selectedData }));
         }
     </script>
 
