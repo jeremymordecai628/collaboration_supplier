@@ -55,7 +55,7 @@
         <a href="code.html">Raise_Ticket</a>
         <a href="helper.html">Review_old Tickets</a>
         <a href="rate.html">rate_supplier</a>
-        <a href="Approval.html">Tickets_for_approvall</a>
+        <a href="Approval.html">Tickets_for_approval</a>
         <a href="Approved.html">Checked for Approved Tickets</a>
     </div>
     <div class="main-content">
@@ -93,7 +93,40 @@
                         document.getElementById('position').value = data.User_position || '';
                         document.getElementById('organization').value = data.User_organization || '';
                         document.getElementById('email').value = data.User_email || '';
-                        // Add more fields as needed
+
+                        // Get user position
+                        const position = data.User_position;
+
+                        // Get navigation links
+                        const links = {
+                            raiseTicket: document.querySelector('a[href="code.html"]'),
+                            reviewOldTickets: document.querySelector('a[href="helper.html"]'),
+                            rateSupplier: document.querySelector('a[href="rate.html"]'),
+                            ticketsForApproval: document.querySelector('a[href="Approval.html"]'),
+                            checkedApprovedTickets: document.querySelector('a[href="Approved.html"]')
+                        };
+
+                        // Show or hide navigation links based on user position
+                        if (position === 'Normal Employee') {
+                            links.reviewOldTickets.style.display = 'none';
+                            links.checkedApprovedTickets.style.display = 'none';
+                            links.ticketsForApproval.style.display ='none';
+                        } else if (position === 'Procurement employee') {
+                            links.reviewOldTickets.style.display = 'none';
+                            links.checkedApprovedTickets.style.display = 'none';
+                        } else if (position === 'supplier') {
+                            links.raiseTicket.style.display = 'none';
+                            links.reviewOldTickets.style.display = 'none';
+                            links.rateSupplier.style.display = 'none';
+                            links.ticketsForApproval.style.display = 'none';
+                            links.checkedApprovedTickets.style.display = 'block';
+                        } else if (position === 'Technician' || position === 'Manager') {
+                            links.raiseTicket.style.display = 'block';
+                            links.reviewOldTickets.style.display = 'block';
+                            links.rateSupplier.style.display = 'block';
+                            links.ticketsForApproval.style.display = 'block';
+                            links.checkedApprovedTickets.style.display = 'block';
+                        }
                     } else {
                         document.getElementById('user-info').innerText = 'No user session found.';
                     }
