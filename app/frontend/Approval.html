@@ -1,45 +1,66 @@
-// Function to get an item from localStorage and delete it
-function getAndDeleteFromLocalStorage(key) {
-    const item = localStorage.getItem(key);
-    if (item) {
-        localStorage.removeItem(key);
-        return item;
-    } else {
-        console.log(`Item with key "${key}" not found in localStorage.`);
-        return null;
-    }
-}
-
-// Function to save data to a file using the File System Access API
-async function saveToFileSystem(data, fileName) {
-    try {
-        // Show file save dialog
-        const handle = await window.showSaveFilePicker({
-            suggestedName: fileName,
-            types: [{
-                description: 'Text Files',
-                accept: {'text/plain': ['.txt']}
-            }]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approved Tickets Form</title>
+    <script>
+        // Fetch data from PHP file and populate the form
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('../stuff.php') // Replace 'your_php_file.php' with the path to your PHP file
+                .then(response => response.json())
+                .then(data => {
+                    const approvedTickets = data.approved_tickets;
+                    const formContainer = document.getElementById('form-container');
+                    
+                    approvedTickets.forEach(ticket => {
+                        // Create a new form element for each ticket
+                        const formElement = document.createElement('form');
+                        formElement.setAttribute('action', 'process_form.php'); // Replace with your PHP processing file
+                        formElement.setAttribute('method', 'post');
+                        formElement.innerHTML = `
+                            <input type="hidden" name="site" value="${ticket.site}">
+                            <input type="hidden" name="quantity" value="${ticket.quantity}">
+                            <input type="hidden" name="company" value="${ticket.company}">
+                            <input type="hidden" name="procurement_employee" value="${ticket.Procurement_employee}">
+                            
+                            <div>
+                                <label>Site:</label>
+                                <input type="text" name="site_display" value="${ticket.site}" readonly>
+                            </div>
+                            <div>
+                                <label>Quantity:</label>
+                                <input type="text" name="quantity_display" value="${ticket.quantity}" readonly>
+                            </div>
+                            <div>
+                                <label>Company:</label>
+                                <input type="text" name="company_display" value="${ticket.company}" readonly>
+                            </div>
+                            <div>
+                                <label>Procurement Employee:</label>
+                                <input type="text" name="procurement_employee_display" value="${ticket.Procurement_employee}" readonly>
+                            </div>
+                            <div>
+                                <label>Approved:</label>
+                                <select name="approved">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button type="submit">Submit</button>
+                            </div>
+                            <hr>
+                        `;
+                        formContainer.appendChild(formElement);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
         });
-
-        // Create a writable stream
-        const writableStream = await handle.createWritable();
-
-        // Write data to the file
-        await writableStream.write(data);
-
-        // Close the file and write the contents to disk
-        await writableStream.close();
-
-        console.log('File saved successfully.');
-    } catch (error) {
-        console.error('Error saving file:', error);
-    }
-}
-
-// Example usage
-const key = 'myKey';
-const data = getAndDeleteFromLocalStorage(key);
-if (data) {
-    saveToFileSystem(data, 'myFile.txt');
-}
+    </script>
+</head>
+<body>
+    <h1>Approved Tickets Form</h1>
+    <div id="form-container"></div>
+</body>
+</html>

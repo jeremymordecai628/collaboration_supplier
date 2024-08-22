@@ -40,21 +40,16 @@
         .checkbox {
             margin-right: 10px;
         }
-        #emailInput {
-            margin-bottom: 20px;
+        #submitButton {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-
     <h1>LocalStorage Data</h1>
 
-    <div id="emailInput">
-        <input type="text" id="emailAddress" placeholder="Enter email address">
-        <button onclick="sendData()">Send Data</button>
-    </div>
-
+    <button id="submitButton">Submit Selected Key</button>
 
     <div id="localStorageData">
         <!-- LocalStorage data will be inserted here -->
@@ -63,6 +58,8 @@
     <script>
         // Get the div element to hold the data
         const dataContainer = document.getElementById('localStorageData');
+        const submitButton = document.getElementById('submitButton');
+        let selectedKey = '';
 
         // Define global variables to store technician and requester names
         let technicianName = '';
@@ -138,43 +135,26 @@
                         valueDiv.style.display = valueDiv.style.display === 'none' ? 'block' : 'none';
                     }
                 });
+
+                // Add a click event listener to select the key
+                container.addEventListener('click', () => {
+                    // Set the selected key
+                    if (selectedKey !== key) {
+                        selectedKey = key;
+                    }
+                });
             }
         }
 
-        // Function to send selected data via AJAX
-        function sendData() {
-            const email = document.getElementById('emailAddress').value.trim();
-            if (!email) {
-                alert('Please enter an email address.');
-                return;
+        // Redirect to purchase_order.html with the selected key as a query parameter
+        submitButton.addEventListener('click', () => {
+            if (selectedKey) {
+                const url = `purchase_order.html?key=${encodeURIComponent(selectedKey)}`;
+                window.location.href = url;
+            } else {
+                alert('Please select a key before submitting.');
             }
-
-            // Collect data from checked containers
-            const selectedData = [];
-            document.querySelectorAll('.container.highlight').forEach(container => {
-                const key = container.querySelector('.key').textContent;
-                const value = container.querySelector('.value').textContent;
-                selectedData.push({ key, value });
-            });
-
-            if (selectedData.length === 0) {
-                alert('Please select at least one item to send.');
-                return;
-            }
-
-            // Send data to PHP script via AJAX
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '../email.php', true); // Adjust the path as needed
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    alert('Data sent successfully.');
-                } else {
-                    alert('Failed to send data.');
-                }
-            };
-            xhr.send(JSON.stringify({ email, data: selectedData }));
-        }
+        });
     </script>
 
 </body>
