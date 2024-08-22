@@ -9,7 +9,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 // Check if user session exists
-if (!isset($_SESSION['user'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['User_email'])) {
     echo "User session does not exist!";
     exit; // Exit if the session does not exist
 }
@@ -21,7 +21,7 @@ $user_password = $_SESSION['user']['User_credetials']; // Assuming password is s
 // Placeholder for required variables
 $smtp_server = 'smtp.gmail.com'; // Gmail SMTP server
 $smtp_port = 587; // your SMTP port
-$email = 'jeremymordecai08@gmail.com'; // Replace with recipient email
+$email = $; // recipient email
 
 // Email content
 $subject = "Approval of Purchase Request";

@@ -1,3 +1,33 @@
+<?php
+function get_db_connection(){
+    $servername = "localhost";
+    $db_username = "root"; // Changed variable name to avoid conflict with POST data
+    $db_password = "";
+    $dbname = "Supplier_Collaboration"; // Ensure this is set to your database name
+
+    $conn = new mysqli($servername, $db_username, $db_password, $dbname);
+    // Check the connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    return $conn;
+
+    }
+function get_procurement_user(){
+    $conn = get_db_connection(); // Call your function to get DB connection
+    $pro_user=[];
+    $result = $conn->query("SELECT User_id, User_name FROM USERS WHERE User_role =proc");
+
+    while ($row = $result->fetch_assoc()) {
+       $pro_user[]= $row;
+    }
+
+    $conn->close();
+    return $pro_user;
+        
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,9 +77,47 @@
 </head>
 <body>
 
-    <h1>LocalStorage Data</h1>
+    <h1>function get_db_connection(){
+        $servername = "localhost";
+        $db_username = "root"; // Changed variable name to avoid conflict with POST data
+        $db_password = "";
+        $dbname = "Supplier_Collaboration"; // Ensure this is set to your database name
+    
+        $conn = new mysqli($servername, $db_username, $db_password, $dbname);
+        // Check the connection
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+        return $conn;
+    
+        }
+    function get_procurement_user(){
+        $conn = get_db_connection(); // Call your function to get DB connection
+        $pro_user=[];
+        $result = $conn->query("SELECT User_id, User_name FROM USERS WHERE User_role =proc");
+    
+        while ($row = $result->fetch_assoc()) {
+           $pro_user[]= $row;
+        }
+    
+        $conn->close();
+        return $pro_user;
+            
+    }LocalStorage Data</h1>
+    <form action="../email.php" method="post">
+        <label for="procurement">Select Procurement:</label>
+        <select id="procurement" name="procurement_id" required>
+     
+            <?php
+                $pro_user=get_procurement_user();
+                foreach ($pro_user as procurement){
+                    echo '<option value="' . htmlspecialchars($procurement['User_id']) . '">' . htmlspecialchars($procurement['User_name']) . '</option>';
+                }
+           
+            ?>
+        </select>
 
-    <button id="submitButton">Submit Selected Key</button>
+    <button id="submitButton">Send for Approval</button>
 
     <div id="localStorageData">
         <!-- LocalStorage data will be inserted here -->
