@@ -19,9 +19,9 @@ $user_email = $_SESSION['user']['User_email'];
 $user_password = $_SESSION['user']['User_credetials']; // Assuming password is stored in the session
 
 // Placeholder for required variables
-$smtp_server = 'smtp.example.com'; // Replace with your SMTP server
-$smtp_port = 587; // Replace with your SMTP port
-$email = 'recipient@example.com'; // Replace with recipient email
+$smtp_server = 'smtp.gmail.com'; // Gmail SMTP server
+$smtp_port = 587; // your SMTP port
+$email = 'jeremymordecai08@gmail.com'; // Replace with recipient email
 
 // Email content
 $subject = "Approval of Purchase Request";
