@@ -14,14 +14,53 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['User_email'])) {
     exit; // Exit if the session does not exist
 }
 
-// Retrieve user email and credentials from session
-$user_email = $_SESSION['user']['User_email'];
-$user_password = $_SESSION['user']['User_credetials']; // Assuming password is stored in the session
+// Define sender email configuration
+$sender_email = 'appmail@gmail.com'; // Fixed sender email
+$sender_password = 'admin123';       // Fixed sender password or App password for 2-step verification
 
-// Placeholder for required variables
-$smtp_server = 'smtp.gmail.com'; // Gmail SMTP server
-$smtp_port = 587; // your SMTP port
-$email = $; // recipient email
+// Function to get database connection
+function get_db_connection() {
+    $servername = "localhost";
+    $db_username = "root";
+    $db_password = "";
+    $dbname = "Supplier_Collaboration"; // Ensure this is set to your database name
+
+    $conn = new mysqli($servername, $db_username, $db_password, $dbname);
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    return $conn;
+}
+
+// Function to get the recipient email based on procurement ID
+function get_recipient_email($procurement_id) {
+    $conn = get_db_connection();
+    $recipient_email = '';
+
+    // Prepare and execute the query to fetch recipient email based on procurement_id
+    $query = "SELECT User_email FROM USERS WHERE User_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $procurement_id);
+    $stmt->execute();
+    $stmt->bind_result($recipient_email);
+    $stmt->fetch();
+    
+    $stmt->close();
+    $conn->close();
+
+    return $recipient_email;
+}
+
+// Get procurement_id from POST request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['procurement_id'])) {
+    $procurement_id = intval($_POST['procurement_id']); // Sanitize the input
+    $email = get_recipient_email($procurement_id);
+
+    if (!$email) {
+        echo "Recipient email not found!";
+        exit;
+    }
+
 
 // Email content
 $subject = "Approval of Purchase Request";
@@ -35,33 +74,36 @@ foreach ($selectedData as $item) {
 }
 
 // Create the email
-$mail = new PHPMailer(true);
+ $mail = new PHPMailer(true);
 
-try {
-    // Server settings
-    $mail->isSMTP();                                           // Send using SMTP
-    $mail->Host       = $smtp_server;                          // Set the SMTP server to send through
-    $mail->SMTPAuth   = true;                                  // Enable SMTP authentication
-    $mail->Username   = $user_email;                           // SMTP username from session
-    $mail->Password   = $user_password;                        // SMTP password from session        
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;        // Enable TLS encryption
-    $mail->Port       = $smtp_port;                            // TCP port to connect to
+    try {
+        // Server settings
+        $mail->isSMTP();                                           // Send using SMTP
+        $mail->Host       = 'smtp.gmail.com';                      // Set the SMTP server to send through
+        $mail->SMTPAuth   = true;                                  // Enable SMTP authentication
+        $mail->Username   = $sender_email;                           // SMTP username 
+        $mail->Password   = $sender_password;                        // SMTP password        
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption
+        $mail->Port       = 587;                                  // TCP port to connect to
 
-    // Sender
-    $mail->setFrom($user_email);                               // Set the sender's email
+        // Sender
+        $mail->setFrom($sender_email, 'Modecai Moringa');                  // Set the sender's email and name
 
-    // Recipient
-    $mail->addAddress($email);                                 // Add recipient email
+        // Recipient
+        $mail->addAddress($email);                                 // Add recipient email
 
-    // Content
-    $mail->isHTML(false);                                      // Set email format to plain text
-    $mail->Subject = $subject;
-    $mail->Body    = $body;
+        // Content
+        $mail->isHTML(false);                                      // Set email format to plain text
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
 
-    // Send the email
-    $mail->send();
-    echo "Emails sent successfully!";
-} catch (Exception $e) {
-    echo "Failed to send email: {$mail->ErrorInfo}";
+        // Send the email
+        $mail->send();
+        echo "Email sent successfully!";
+    } catch (Exception $e) {
+        echo "Failed to send email: {$mail->ErrorInfo}";
+    }
+} else {
+    echo "No procurement ID provided!";
 }
 ?>
