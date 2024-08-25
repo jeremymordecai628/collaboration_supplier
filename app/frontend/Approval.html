@@ -97,7 +97,7 @@
                     approvedTickets.forEach(ticket => {
                         // Create a new form element for each ticket
                         const formElement = document.createElement('form');
-                        formElement.setAttribute('action', '../data_entry.php'); // PHP processing file
+                        formElement.setAttribute('action', '../data_entry2.php'); // PHP processing file
                         formElement.setAttribute('method', 'post');
                         formElement.innerHTML = `
                             <input type="hidden" name="id" value="${ticket.id}">
