@@ -55,13 +55,14 @@ if ($result_users->num_rows > 0) {
 }
 
 // Query to fetch site, quantity, company, and Procurement_employee from Approved_Tickets table
-$sql_Approve = "SELECT site, quantity, company, Procurement_employee, approved, Delivered FROM Approved_Tickets";
+$sql_Approve = "SELECT id , site, quantity, company, Procurement_employee, approved, Delivered FROM Approved_Tickets";
 $result_approve = $conn->query($sql_Approve);
 
 $records = array();
 if ($result_approve->num_rows > 0) {
     while ($row = $result_approve->fetch_assoc()) {
         $records[] = array(
+            "id" => $row["id"],
             "site" => $row["site"],
             "quantity" => $row["quantity"],
             "company" => $row["company"],

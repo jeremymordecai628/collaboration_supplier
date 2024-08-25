@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>Purchase Request</title>
     <style>
         body {
@@ -129,6 +133,11 @@
         </form>
 
         <script>
+            // Check if the page was accessed via the browser's back/forward button
+            if (performance.navigation.type === 2) {
+                // Redirect to the login page
+                window.location.replace("/index.html");
+            }
             class Track {
                 getCurrentDatetime() {
                     const now = new Date();
@@ -208,7 +217,7 @@
                 const key = track.pickTwoRandomNumbers();
                 saveFormDataToLocalStorage(key, formData);
 
-                window.location.href = "helper.html";
+                window.location.href = "frontpage.html";
             }
         </script>
     </div>

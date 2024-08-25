@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>Feedback Form</title>
     <style>
         body {
@@ -108,6 +112,10 @@
         <input type="submit" value="Submit">
     </form>
     <script>
+        if (performance.navigation.type === 2) {
+        // Page was accessed via a back/forward button
+        window.location.replace("/index.html");
+    }
         document.addEventListener("DOMContentLoaded", function() {
             fetch('../stuff.php')
                 .then(response => response.json())
@@ -175,7 +183,7 @@
             formData.append('vendor', vendor);
             formData.append('total_points', points);
 
-            fetch('your_php_script.php', {
+            fetch('../data_entry.php', {
                 method: 'POST',
                 body: formData
             }).then(response => response.text())

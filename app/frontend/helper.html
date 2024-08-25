@@ -1,114 +1,138 @@
-<?php
-function get_db_connection(){
-    $servername = "localhost";
-    $db_username = "root"; // Changed variable name to avoid conflict with POST data
-    $db_password = "";
-    $dbname = "Supplier_Collaboration"; // Ensure this is set to your database name
-
-    $conn = new mysqli($servername, $db_username, $db_password, $dbname);
-    // Check the connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-    return $conn;
-
-    }
-function get_procurement_user(){
-    $conn = get_db_connection(); // Call your function to get DB connection
-    $pro_user=[];
-    $stmt = $conn->prepare("SELECT User_id, User_name FROM USERS WHERE User_role = ?");
-    $role = 'proc'; // Assuming 'proc' is a fixed value; otherwise, use a variable
-    $stmt->bind_param("s", $role);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    while ($row = $result->fetch_assoc()) {
-       $pro_user[]= $row;
-    }
-    $stmt->close();
-    $conn->close();
-    return $pro_user;
-        
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>Display LocalStorage</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f0f0f5;
         }
         h1 {
             color: #333;
+            text-align: center;
+            margin-bottom: 20px;
         }
         .container {
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 15px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            background-color: #f4f4f4;
-            display: flex;
-            align-items: center;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 16px;
         }
         .container:hover {
-            background-color: #e4e4e4;
-        }
-        .container.highlight {
-            border: 2px solid #ff0000;
-            background-color: #ffe6e6;
+            background-color: #f9f9f9;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
         .container .key {
             font-weight: bold;
-            flex-grow: 1;
+            font-size: 20px;
+            margin-bottom: 10px;
         }
-        .container .value {
-            display: none;
+        form {
+            display: none; /* Hide the form initially */
             margin-top: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            width: 100%;
+            animation: slideDown 0.4s ease forwards;
         }
-        .checkbox {
-            margin-right: 10px;
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        #submitButton {
+        form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        form input[type="text"] {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        form button[type="submit"] {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+        form button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .submit-button-container {
+            display: flex;
+            justify-content: center;
             margin-top: 20px;
+        }
+        .hit-me-button {
+            display: flex;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: blue;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+        .hit-me-button.show {
+            display: block; /* Show when needed */
+        }
+        .hit-me-button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
-            
-    <h1>LocalStorage Data</h1>
-      <form action="../email.php" method="post">
-        <label for="procurement">Select Procurement:</label>
-        <select id="procurement" name="procurement_id" required>
-            <?php
-                $pro_user = get_procurement_user();
-                foreach ($pro_user as $procurement) {
-                    echo '<option value="' . htmlspecialchars($procurement['User_id']) . '">' . htmlspecialchars($procurement['User_name']) . '</option>';
-                }
-            ?>
-        </select>
-
-        <button id="submitButton" type="button">Send for Approval</button>
-    </form>
+    <h1>Raised Tickets</h1>
+    
+    <div class="submit-button-container">
+        <button id="hitMeButton" class="hit-me-button">Hit Me After Submission Of your form</button>
+    </div>
 
     <div id="localStorageData">
         <!-- LocalStorage data will be inserted here -->
     </div>
 
     <script>
+        // Check if the page was accessed via the browser's back/forward button
+        if (performance.navigation.type === 2) {
+            // Redirect to the login page
+            window.location.replace("/index.html");
+        }
         // Get the div element to hold the data
         const dataContainer = document.getElementById('localStorageData');
-        const submitButton = document.getElementById('submitButton');
-        let selectedKey = '';
-
-        // Define global variables to store technician and requester names
-        let technicianName = '';
-        let requesterName = '';
+        const hitMeButton = document.getElementById('hitMeButton');
 
         // Define the regular expression for the key format
         const keyPattern = /^pr-\d+-\d+-\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -120,87 +144,120 @@ function get_procurement_user(){
 
             // Check if the key matches the pattern
             if (keyPattern.test(key)) {
-                // Retrieve requester and technician data
+                let data;
                 try {
                     // Parse the JSON value
-                    const data = JSON.parse(value);
-
-                    // Map technician and requester values
-                    if (data.technician) {
-                        technicianName = data.technician;
-                    }
-                    if (data.requester) {
-                        requesterName = data.requester;
-                    }
+                    data = JSON.parse(value);
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
                     continue;
                 }
 
+                
+                // Split the key by space to separate the date and time parts
+                const keyParts = key.split(' ');
+
+                // 'Timepart' will store the time part of the key (e.g., '10:30:00')
+                const Timepart = keyParts[1];
+
+                // Split the first part of the key by hyphen '-'
+                const dateParts = keyParts[0].split('-');
+
+                // Extracting the correct date format
+                const date = `${dateParts[3]}-${dateParts[4]}-${dateParts[5]}`; // Produces '2024-08-25'
+
                 // Create a new div for the container
                 const container = document.createElement('div');
                 container.classList.add('container');
-                container.setAttribute('data-key', key); // Add data attribute for key
+                container.setAttribute('data-key', key);
 
-                // Create a checkbox
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.classList.add('checkbox');
-                checkbox.addEventListener('change', function() {
-                    // Highlight the container if the checkbox is checked
-                    if (this.checked) {
-                        container.classList.add('highlight');
-                    } else {
-                        container.classList.remove('highlight');
-                    }
-                });
+                // Create a label for the key
+                const keyLabel = document.createElement('div');
+                keyLabel.classList.add('key');
+                keyLabel.textContent = `ID: ${key}`;
 
-                // Create a div for the key
-                const keyDiv = document.createElement('div');
-                keyDiv.classList.add('key');
-                keyDiv.textContent = `Requester ID: ${key}, Technician: ${technicianName}, Requester: ${requesterName}`;
+                // Create a form for displaying data
+                const form = document.createElement('form');
+                form.setAttribute('method', 'post');
+                form.setAttribute('action', 'data_entry.php');  // Change to your PHP script URL
 
-                // Create a div for the value
-                const valueDiv = document.createElement('div');
-                valueDiv.classList.add('value');
-                valueDiv.textContent = `Data: ${value}`;
+                // Add key and date fields
+                form.innerHTML = `
+                    <label for="id">ID:</label>
+                    <input type="text" id="id" name="id" value="${key}" readonly><br>
+                    <label for="Time">Time:</label>
+                    <input type="text" id="Time" name="id" value="${Timepart}" readonly><br>
+                    <label for ="Date">Date;</label>
+                    <input type ="text" id ="Date" name ="id" value ="${dateParts}"readonly><br>
+                `;
 
-                // Append the checkbox, key, and value divs to the container
-                container.appendChild(checkbox);
-                container.appendChild(keyDiv);
-                container.appendChild(valueDiv);
+                // Dynamically add fields from the stored data in localStorage
+                for (const [field, fieldValue] of Object.entries(data)) {
+                    const fieldLabel = document.createElement('label');
+                    fieldLabel.setAttribute('for', field);
+                    fieldLabel.textContent = `${field.charAt(0).toUpperCase() + field.slice(1)}:`;
+
+                    const fieldInput = document.createElement('input');
+                    fieldInput.setAttribute('type', 'text');
+                    fieldInput.setAttribute('id', field);
+                    fieldInput.setAttribute('name', field);
+                    fieldInput.setAttribute('value', fieldValue);
+                    fieldInput.readOnly = true;
+
+                    form.appendChild(fieldLabel);
+                    form.appendChild(fieldInput);
+                    form.appendChild(document.createElement('br'));
+                }
+
+                // Add a submit button to the form
+                const submitFormButton = document.createElement('button');
+                submitFormButton.setAttribute('type', 'submit');
+                submitFormButton.textContent = 'Submit Form';
+                form.appendChild(submitFormButton);
+
+                // Append the key label, form to the container
+                container.appendChild(keyLabel);
+                container.appendChild(form);
 
                 // Append the container to the main data container
                 dataContainer.appendChild(container);
 
-                // Add a click event listener to toggle the visibility of the value div
+                // Add a click event listener to toggle the visibility of the form
                 container.addEventListener('click', (event) => {
-                    // Avoid toggling if the checkbox is clicked
-                    if (event.target !== checkbox) {
-                        valueDiv.style.display = valueDiv.style.display === 'none' ? 'block' : 'none';
+                    if (event.target !== form && event.target !== submitFormButton) {
+                        form.style.display = form.style.display === 'none' ? 'block' : 'none';
                     }
                 });
 
-                // Add a click event listener to select the key
-                container.addEventListener('click', () => {
-                    // Set the selected key
-                    if (selectedKey !== key) {
-                        selectedKey = key;
-                    }
+                // Handle form submission
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault(); // Prevent default form submission
+                    const formData = new FormData(form);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', form.getAttribute('action'), true);
+                    xhr.onload = function () {
+                        if (xhr.status === 200) {
+                            // On success, remove the item from localStorage
+                            localStorage.removeItem(key);
+
+                            // Hide the form
+                            form.style.display = 'none';
+
+                            // Show the "Hit Me After Submission" button
+                            hitMeButton.classList.add('show');
+                        } else {
+                            console.error('Error submitting form');
+                        }
+                    };
+                    xhr.send(formData);
                 });
             }
         }
 
-        // Redirect to purchase_order.html with the selected key as a query parameter
-        submitButton.addEventListener('click', () => {
-            if (selectedKey) {
-                const url = `purchase_order.html?key=${encodeURIComponent(selectedKey)}`;
-                window.location.href = url;
-            } else {
-                alert('Please select a key before submitting.');
-            }
+        // Handle click on "Hit Me After Submission" button
+        hitMeButton.addEventListener('click', () => {
+            window.location.href = '../data_entry.php'; // Change to your redirect page URL
         });
     </script>
-
 </body>
 </html>
