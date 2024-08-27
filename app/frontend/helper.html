@@ -89,36 +89,10 @@
         form button[type="submit"]:hover {
             background-color: #0056b3;
         }
-        .submit-button-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .hit-me-button {
-            display: flex;
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: blue;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            font-size: 16px;
-        }
-        .hit-me-button.show {
-            display: block; /* Show when needed */
-        }
-        .hit-me-button:hover {
-            background-color: #218838;
-        }
     </style>
 </head>
 <body>
     <h1>Raised Tickets</h1>
-    
-    <div class="submit-button-container">
-        <button id="hitMeButton" class="hit-me-button">Hit Me After Submission Of your form</button>
-    </div>
 
     <div id="localStorageData">
         <!-- LocalStorage data will be inserted here -->
@@ -130,9 +104,9 @@
             // Redirect to the login page
             window.location.replace("/index.html");
         }
+
         // Get the div element to hold the data
         const dataContainer = document.getElementById('localStorageData');
-        const hitMeButton = document.getElementById('hitMeButton');
 
         // Define the regular expression for the key format
         const keyPattern = /^pr-\d+-\d+-\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -153,12 +127,11 @@
                     continue;
                 }
 
-                
                 // Split the key by space to separate the date and time parts
                 const keyParts = key.split(' ');
 
-                // 'Timepart' will store the time part of the key (e.g., '10:30:00')
-                const Timepart = keyParts[1];
+                // 'timePart' will store the time part of the key (e.g., '10:30:00')
+                const timePart = keyParts[1];
 
                 // Split the first part of the key by hyphen '-'
                 const dateParts = keyParts[0].split('-');
@@ -179,16 +152,16 @@
                 // Create a form for displaying data
                 const form = document.createElement('form');
                 form.setAttribute('method', 'post');
-                form.setAttribute('action', 'data_entry.php');  // Change to your PHP script URL
+                form.setAttribute('action', '../data_entry2.php'); // PHP processing file
 
                 // Add key and date fields
                 form.innerHTML = `
                     <label for="id">ID:</label>
                     <input type="text" id="id" name="id" value="${key}" readonly><br>
                     <label for="Time">Time:</label>
-                    <input type="text" id="Time" name="id" value="${Timepart}" readonly><br>
-                    <label for ="Date">Date;</label>
-                    <input type ="text" id ="Date" name ="id" value ="${dateParts}"readonly><br>
+                    <input type="text" id="Time" name="Time" value="${timePart}" readonly><br>
+                    <label for="Date">Date:</label>
+                    <input type="text" id="Date" name="Date" value="${date}" readonly><br>
                 `;
 
                 // Dynamically add fields from the stored data in localStorage
@@ -243,8 +216,8 @@
                             // Hide the form
                             form.style.display = 'none';
 
-                            // Show the "Hit Me After Submission" button
-                            hitMeButton.classList.add('show');
+                            // Optionally, redirect or show a message here
+                            alert('Form submitted successfully!');
                         } else {
                             console.error('Error submitting form');
                         }
@@ -253,11 +226,6 @@
                 });
             }
         }
-
-        // Handle click on "Hit Me After Submission" button
-        hitMeButton.addEventListener('click', () => {
-            window.location.href = '../data_entry.php'; // Change to your redirect page URL
-        });
     </script>
 </body>
 </html>

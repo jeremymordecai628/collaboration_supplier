@@ -65,7 +65,7 @@
     </style>
 </head>
 <body>
-    <form id="feedbackForm" action="" method="post">
+    <form id="feedbackForm" method="post">
         <label for="vendor">Vendor:</label>
         <select id="vendor" name="vendor">
             <!-- Options will be populated dynamically -->
@@ -76,7 +76,7 @@
             <!-- Options will be populated dynamically -->
         </select>
 
-        <label for="user-choice">Did yo receive the product (Yes/No):</label>
+        <label for="user-choice">Did you receive the product (Yes/No):</label>
         <select id="user-choice" name="user-choice">
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -106,16 +106,17 @@
         <label for="vendor-rating">How well will you rate the vendor's services? (Out of 10)</label>
         <input type="number" id="vendor-rating" name="vendor-rating" min="0" max="10" required>
 
-        <!-- Hidden input to store total points -->
-        <input type="hidden" id="total-points" name="total-points">
+        <label for="total-points">Total points</label>
+        <input type="text" id="total-points" name="total-points">
 
         <input type="submit" value="Submit">
     </form>
     <script>
         if (performance.navigation.type === 2) {
-        // Page was accessed via a back/forward button
-        window.location.replace("/index.html");
-    }
+            // Page was accessed via a back/forward button
+            window.location.replace("/index.html");
+        }
+    
         document.addEventListener("DOMContentLoaded", function() {
             fetch('../stuff.php')
                 .then(response => response.json())
@@ -125,7 +126,7 @@
                 })
                 .catch(error => console.error('Error fetching data:', error));
         });
-
+    
         function populateVendorDropdown(vendors) {
             const vendorDropdown = document.getElementById('vendor');
             vendors.forEach(vendor => {
@@ -135,7 +136,7 @@
                 vendorDropdown.appendChild(option);
             });
         }
-
+    
         function populateProductSpecsDropdown(productSpecs) {
             const productSpecsDropdown = document.getElementById('product-specs');
             productSpecs.forEach(spec => {
@@ -145,10 +146,10 @@
                 productSpecsDropdown.appendChild(option);
             });
         }
-
+    
         function calculatePoints() {
             let points = 0;
-
+    
             // Each "Yes" is worth 5 marks
             const yesFields = ['user-choice', 'product-condition', 'product-working'];
             yesFields.forEach(field => {
@@ -156,43 +157,51 @@
                     points += 5;
                 }
             });
-
+    
             // "On Time" is worth 5 marks
             if (document.getElementById('delivery-time').value === 'On Time') {
                 points += 5;
             }
-
+    
             // Vendor rating is worth whatever the user entered
             const vendorRating = parseInt(document.getElementById('vendor-rating').value) || 0;
             points += vendorRating;
-
+    
             return points;
         }
-
+    
         function handleSubmit(event) {
             event.preventDefault(); // Prevent the form from submitting the default way
-
+    
             const points = calculatePoints();
             const vendor = document.getElementById('vendor').value;
-
+    
             // Display the points
             document.getElementById('total-points').value = points;
-
+    
             // Send data to PHP script
-            const formData = new FormData();
-            formData.append('vendor', vendor);
-            formData.append('total_points', points);
-
+            const formData = new FormData(document.getElementById('feedbackForm'));
+    
             fetch('../data_entry3.php', {
                 method: 'POST',
                 body: formData
-            }).then(response => response.text())
-              .then(data => console.log(data))
-              .catch(error => console.error('Error:', error));
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                
+                // Clear the form fields after successful submission
+                document.getElementById('feedbackForm').reset();
+    
+                // Optionally, display a success message to the user
+                alert('Form submitted successfully and cleared!');
+            })
+            .catch(error => console.error('Error:', error));
         }
-
+    
         // Attach handleSubmit to the form's submit event
         document.getElementById('feedbackForm').addEventListener('submit', handleSubmit);
     </script>
+    
 </body>
 </html>
