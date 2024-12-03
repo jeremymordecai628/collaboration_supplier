@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Display LocalStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 16px;
+        }
+        .container:hover {
+            background-color: #f9f9f9;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .container .key {
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        form {
+            display: none; /* Hide the form initially */
+            margin-top: 10px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            width: 100%;
+            animation: slideDown 0.4s ease forwards;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        form input[type="text"] {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        form button[type="submit"] {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+        form button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Raised Tickets</h1>
+
+    <div id="localStorageData">
+        <!-- LocalStorage data will be inserted here -->
+    </div>
+
+    <script>
+        // Check if the page was accessed via the browser's back/forward button
+        if (performance.navigation.type === 2) {
+            // Redirect to the login page
+            window.location.replace("/index.html");
+        }
+
+        // Get the div element to hold the data
+        const dataContainer = document.getElementById('localStorageData');
+
+        // Define the regular expression for the key format
+        const keyPattern = /^pr-\d+-\d+-\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+
+        // Iterate through localStorage and display each key-value pair that matches the pattern
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+
+            // Check if the key matches the pattern
+            if (keyPattern.test(key)) {
+                let data;
+                try {
+                    // Parse the JSON value
+                    data = JSON.parse(value);
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    continue;
+                }
+
+                // Split the key by space to separate the date and time parts
+                const keyParts = key.split(' ');
+
+                // 'timePart' will store the time part of the key (e.g., '10:30:00')
+                const timePart = keyParts[1];
+
+                // Split the first part of the key by hyphen '-'
+                const dateParts = keyParts[0].split('-');
+
+                // Extracting the correct date format
+                const date = `${dateParts[3]}-${dateParts[4]}-${dateParts[5]}`; // Produces '2024-08-25'
+
+                // Create a new div for the container
+                const container = document.createElement('div');
+                container.classList.add('container');
+                container.setAttribute('data-key', key);
+
+                // Create a label for the key
+                const keyLabel = document.createElement('div');
+                keyLabel.classList.add('key');
+                keyLabel.textContent = `ID: ${key}`;
+
+                // Create a form for displaying data
+                const form = document.createElement('form');
+                form.setAttribute('method', 'post');
+                form.setAttribute('action', '../data_entry2.php'); // PHP processing file
+
+                // Add key and date fields
+                form.innerHTML = `
+                    <label for="id">ID:</label>
+                    <input type="text" id="id" name="id" value="${key}" readonly><br>
+                    <label for="Time">Time:</label>
+                    <input type="text" id="Time" name="Time" value="${timePart}" readonly><br>
+                    <label for="Date">Date:</label>
+                    <input type="text" id="Date" name="Date" value="${date}" readonly><br>
+                `;
+
+                // Dynamically add fields from the stored data in localStorage
+                for (const [field, fieldValue] of Object.entries(data)) {
+                    const fieldLabel = document.createElement('label');
+                    fieldLabel.setAttribute('for', field);
+                    fieldLabel.textContent = `${field.charAt(0).toUpperCase() + field.slice(1)}:`;
+
+                    const fieldInput = document.createElement('input');
+                    fieldInput.setAttribute('type', 'text');
+                    fieldInput.setAttribute('id', field);
+                    fieldInput.setAttribute('name', field);
+                    fieldInput.setAttribute('value', fieldValue);
+                    fieldInput.readOnly = true;
+
+                    form.appendChild(fieldLabel);
+                    form.appendChild(fieldInput);
+                    form.appendChild(document.createElement('br'));
+                }
+
+                // Add a submit button to the form
+                const submitFormButton = document.createElement('button');
+                submitFormButton.setAttribute('type', 'submit');
+                submitFormButton.textContent = 'Submit Form';
+                form.appendChild(submitFormButton);
+
+                // Append the key label, form to the container
+                container.appendChild(keyLabel);
+                container.appendChild(form);
+
+                // Append the container to the main data container
+                dataContainer.appendChild(container);
+
+                // Add a click event listener to toggle the visibility of the form
+                container.addEventListener('click', (event) => {
+                    if (event.target !== form && event.target !== submitFormButton) {
+                        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
+
+                // Handle form submission
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault(); // Prevent default form submission
+                    const formData = new FormData(form);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', form.getAttribute('action'), true);
+                    xhr.onload = function () {
+                        if (xhr.status === 200) {
+                            // On success, remove the item from localStorage
+                            localStorage.removeItem(key);
+
+                            // Hide the form
+                            form.style.display = 'none';
+
+                            // Optionally, redirect or show a message here
+                            alert('Form submitted successfully!');
+                        } else {
+                            console.error('Error submitting form');
+                        }
+                    };
+                    xhr.send(formData);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Front Page</title>
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+
+        h1, h2 {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            width: 20%;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .navbar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ecf0f1;
+            font-weight: 400;
+        }
+
+        .navbar a {
+            color: #ecf0f1;
+            padding: 12px 15px;
+            text-decoration: none;
+            text-align: center;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #34495e;
+        }
+
+        .logout-button {
+            background-color: #e74c3c;
+            text-align: center;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s, color 0.3s;
+            color: #ecf0f1;
+        }
+
+        .logout-button:hover {
+            background-color: #c0392b;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        /* Footer at Bottom */
+        .navbar a.logout-button {
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Navigation</h2>
+        <a href="code.html">Raise Ticket</a>
+        <a href="helper.html">Review Old Tickets</a>
+        <a href="rate.html">Rate Supplier</a>
+        <a href="Approval.html">Tickets for Approval</a>
+        <a href="Approved.html">Checked for Approved Tickets</a>
+        <a href="../logout.php" class="logout-button">Logout</a> <!-- Logout Button -->
+    </div>
+    <div class="main-content">
+        <h1>Welcome to the Front Page</h1>
+        <div id="user-info">Your Credentials</div>
+        <form id="user-form">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" readonly>
+            </div>
+            <div class="form-group">
+                <label for="position">Position:</label>
+                <input type="text" id="position" name="position" readonly>
+            </div>
+            <div class="form-group">
+                <label for="organization">Organization:</label>
+                <input type="text" id="organization" name="organization" readonly>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" readonly>
+            </div>
+            <!-- Add more fields as needed -->
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch user data from data.php
+            fetch('../data.php') // Adjust this path to the location of data.php
+                .then(response => response.json())
+                .then(data => {
+                    if (Object.keys(data).length > 0) {
+                        // Populate the form with user data
+                        document.getElementById('username').value = data.User_name || '';
+                        document.getElementById('position').value = data.User_position || '';
+                        document.getElementById('organization').value = data.User_organization || '';
+                        document.getElementById('email').value = data.User_email || '';
+
+                        // Get user position
+                        const position = data.User_position;
+
+                        // Get navigation links
+                        const links = {
+                            raiseTicket: document.querySelector('a[href="code.html"]'),
+                            reviewOldTickets: document.querySelector('a[href="helper.html"]'),
+                            rateSupplier: document.querySelector('a[href="rate.html"]'),
+                            ticketsForApproval: document.querySelector('a[href="Approval.html"]'),
+                            checkedApprovedTickets: document.querySelector('a[href="Approved.html"]')
+                        };
+
+                        // Show or hide navigation links based on user position
+                        if (position === 'Normal Employee') {
+                            links.reviewOldTickets.style.display = 'none';
+                            links.checkedApprovedTickets.style.display = 'none';
+                            links.ticketsForApproval.style.display ='none';
+                        } else if (position === 'Procurement employee') {
+                            links.reviewOldTickets.style.display = 'none';
+                            links.checkedApprovedTickets.style.display = 'none';
+                        } else if (position === 'supplier') {
+                            links.raiseTicket.style.display = 'none';
+                            links.reviewOldTickets.style.display = 'none';
+                            links.rateSupplier.style.display = 'none';
+                            links.ticketsForApproval.style.display = 'none';
+                            links.checkedApprovedTickets.style.display = 'block';
+                        } else if (position === 'Technician' || position === 'Manager') {
+                            links.raiseTicket.style.display = 'block';
+                            links.reviewOldTickets.style.display = 'block';
+                            links.rateSupplier.style.display = 'block';
+                            links.ticketsForApproval.style.display = 'block';
+                            links.checkedApprovedTickets.style.display = 'block';
+                        }
+                    } 
+                    else {
+                        // Redirect to logout.php if no user session is found
+                         window.location.href = '../logout.php';
+                    }
+
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+    </script>
+</body>
+</html>

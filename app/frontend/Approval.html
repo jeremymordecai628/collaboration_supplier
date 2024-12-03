@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Kindly Approve the Following Tickets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px; /* Base font size */
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        #form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+    </style>
+    <script>
+        // Check if the page was accessed via the browser's back/forward button
+        if (performance.navigation.type === 2) {
+            // Redirect to the login page
+            window.location.replace("/index.html");
+        }
+        // Fetch data from PHP file and populate the form
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('../stuff.php') //the path to the PHP file
+                .then(response => response.json())
+                .then(data => {
+                    const approvedTickets = data.approved_tickets;
+                    const formContainer = document.getElementById('form-container');
+                    
+                    approvedTickets.forEach(ticket => {
+                        // Create a new form element for each ticket
+                        const formElement = document.createElement('form');
+                        formElement.setAttribute('action', '../data_entry2.php'); // PHP processing file
+                        formElement.setAttribute('method', 'post');
+                        formElement.innerHTML = `
+                            <input type="hidden" name="id" value="${ticket.id}">
+                            <input type="hidden" name="site" value="${ticket.site}">
+                            <input type="hidden" name="quantity" value="${ticket.quantity}">
+                            <input type="hidden" name="company" value="${ticket.company}">
+                            <input type="hidden" name="procurement_employee" value="${ticket.Procurement_employee}">
+                            
+                             <div>
+                                <label>id:</label>
+                                <input type="text" name="id_display" value="${ticket.id}" readonly>
+                            </div>
+                            <div>
+                                <label>Site:</label>
+                                <input type="text" name="site_display" value="${ticket.site}" readonly>
+                            </div>
+                            <div>
+                                <label>Quantity:</label>
+                                <input type="text" name="quantity_display" value="${ticket.quantity}" readonly>
+                            </div>
+                            <div>
+                                <label>Company:</label>
+                                <input type="text" name="company_display" value="${ticket.company}" readonly>
+                            </div>
+                            <div>
+                                <label>Procurement Employee:</label>
+                                <input type="text" name="procurement_employee_display" value="${ticket.Procurement_employee}" readonly>
+                            </div>
+                            <div>
+                                <label>Approved:</label>
+                                <select name="approved">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button type="submit">Submit</button>
+                            </div>
+                            <hr>
+                        `;
+                        formContainer.appendChild(formElement);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+    </script>
+</head>
+<body>
+    <h1>Approved Tickets Form</h1>
+    <div id="form-container"></div>
+</body>
+</html>
